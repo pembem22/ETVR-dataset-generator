@@ -1,0 +1,141 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtky0aysr4256"]
+
+[ext_resource type="Script" path="res://scenes/dataset/dataset_control_pad_display.gd" id="1_qti1t"]
+[ext_resource type="Script" path="res://scenes/dataset/json_label.gd" id="2_wq3xw"]
+
+[node name="DatasetControlPadDisplay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qti1t")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 200.0
+current_tab = 1
+
+[node name="Points" type="MarginContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+metadata/_tab_index = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Points"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Points/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="TabContainer/Points/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "FOV:"
+
+[node name="FOV H Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 30.0
+max_value = 90.0
+value = 70.0
+
+[node name="FOV V Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 30.0
+max_value = 90.0
+value = 70.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/Points/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="TabContainer/Points/VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "Offset:"
+
+[node name="Offset H Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -20.0
+max_value = 20.0
+
+[node name="Offest V Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -20.0
+max_value = 20.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="TabContainer/Points/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="TabContainer/Points/VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "Barrel:"
+
+[node name="Barrel X Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -5.0
+max_value = 0.0
+step = 0.0
+
+[node name="Barrel Y Slider" type="HSlider" parent="TabContainer/Points/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -5.0
+max_value = 0.0
+step = 0.0
+
+[node name="Dataset Collection" type="MarginContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Dataset Collection"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Dataset Collection/VBoxContainer"]
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="TabContainer/Dataset Collection/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Start"
+
+[node name="EndButton" type="Button" parent="TabContainer/Dataset Collection/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "End
+"
+
+[node name="JsonLabel" type="Label" parent="TabContainer/Dataset Collection/VBoxContainer"]
+layout_mode = 2
+script = ExtResource("2_wq3xw")
+
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer/FOV H Slider" to="." method="_on_fov_h_slider_value_changed"]
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer/FOV V Slider" to="." method="_on_fov_v_slider_value_changed"]
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer2/Offset H Slider" to="." method="_on_offset_h_slider_value_changed"]
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer2/Offest V Slider" to="." method="_on_offest_v_slider_value_changed"]
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer3/Barrel X Slider" to="." method="_on_barrel_x_slider_value_changed"]
+[connection signal="value_changed" from="TabContainer/Points/VBoxContainer/HBoxContainer3/Barrel Y Slider" to="." method="_on_barrel_y_slider_value_changed"]
+[connection signal="pressed" from="TabContainer/Dataset Collection/VBoxContainer/HBoxContainer/StartButton" to="." method="_on_collection_start_pressed"]
+[connection signal="pressed" from="TabContainer/Dataset Collection/VBoxContainer/HBoxContainer/EndButton" to="." method="_on_collection_end_pressed"]
