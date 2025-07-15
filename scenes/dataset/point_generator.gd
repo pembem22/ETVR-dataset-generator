@@ -21,6 +21,7 @@ const DISTANCE = 1
 @export var point_prefab: Node3D
 
 @export var audio_player: AudioStreamPlayer
+var audio_panner: AudioEffectPanner
 @export var ok_sound: AudioStream
 @export var skip_sound: AudioStream
 @export var completed_sound: AudioStream
@@ -62,6 +63,8 @@ func _ready():
 	
 	tracking_point = point_prefab.duplicate()
 	add_child(tracking_point)
+	
+	audio_panner = AudioServer.get_bus_effect(0, 0)
 	
 	update()
 
@@ -191,7 +194,7 @@ func move_point(point: Node3D, coords_rad: Vector2, do_tween: bool = true):
 func update_tracking_point(do_tween: bool = true):
 	move_point(tracking_point, calc_point_coords_rad(X, Y, true), do_tween)
 
-func next_point(skip: bool = false):
+func next_point():
 	I += 1
 	if I == samples_per_point:
 		I = 0
@@ -206,10 +209,10 @@ func next_point(skip: bool = false):
 		audio_player.stream = completed_sound
 		audio_player.play()
 
-func generate_json(l_pitch: float, l_yaw: float, r_pitch: float, r_yaw: float):
+func generate_json(include_l: bool, l_pitch: float, l_yaw: float, include_r:bool, r_pitch: float, r_yaw: float):
 	#var eyelid = 1.00 # wide
-	#var eyelid = 0.75 # neutral
-	var eyelid = 0.00 # closed
+	var eyelid = 0.75 # neutral
+	#var eyelid = 0.00 # closed
 	
 	var squint = 0.0 # neutral
 	#var squint = 1.0 # e.g. smile
@@ -218,26 +221,29 @@ func generate_json(l_pitch: float, l_yaw: float, r_pitch: float, r_yaw: float):
 	var eyebrow = 0.0 # neutral
 	#var eyebrow = 1.0 # up
 	
-	return JSON.stringify(
-		{
-			"l": {
-				"pitch": l_pitch, 
-				"yaw": l_yaw, 
-				"eyelid": eyelid,
-				"eyebrow": eyebrow,
-				"squint": squint,
-			}, 
-			"r": {
-				"pitch": r_pitch, 
-				"yaw": r_yaw, 
-				"eyelid": eyelid,
-				"eyebrow": eyebrow,
-				"squint": squint,
-			}
+	var data = {}
+	
+	if include_l:
+		data["l"] = {
+			"pitch": l_pitch, 
+			"yaw": l_yaw, 
+			"eyelid": eyelid,
+			"eyebrow": eyebrow,
+			"squint": squint,
 		}
-	)
+		
+	if include_r:
+		data["r"] = {
+			"pitch": r_pitch, 
+			"yaw": r_yaw, 
+			"eyelid": eyelid,
+			"eyebrow": eyebrow,
+			"squint": squint,
+		}
+	
+	return JSON.stringify(data)
 
-func send_direction():
+func send_direction(send_l: bool, send_r: bool):
 	var l_transform = interface.get_transform_for_view(0, origin.global_transform)
 	var r_transform = interface.get_transform_for_view(1, origin.global_transform)
 	
@@ -252,7 +258,7 @@ func send_direction():
 	var r_pitch = rad_to_deg(asin(-r_vector.y))
 	var r_yaw = rad_to_deg(atan2(r_vector.x, -r_vector.z))
 	
-	var json = generate_json(l_pitch, l_yaw, r_pitch, r_yaw)
+	var json = generate_json(send_l, l_pitch, l_yaw, send_r, r_pitch, r_yaw)
 	EventBus.show_json.emit(json)
 	
 	tcp.put_data((json + "\n").to_utf8_buffer())
@@ -266,12 +272,17 @@ func _on_right_controller_button_pressed(name):
 	if is_previewing:
 		return
 	
-	if name != "trigger_click":
+	if name == "trigger_click":
+		audio_player.stream = ok_sound
+		audio_panner.pan = 0
+		send_direction(true, true)
+	elif name == "grip_click":
+		audio_player.stream = ok_sound
+		audio_panner.pan = 0.5
+		send_direction(false, true)
+	else:
 		return
 	
-	send_direction()
-	
-	audio_player.stream = ok_sound
 	audio_player.play()
 	
 	next_point()
@@ -282,12 +293,18 @@ func _on_left_controller_button_pressed(name):
 	if is_previewing:
 		return
 
-	if name != "trigger_click":
+	if name == "trigger_click":
+		audio_player.stream = skip_sound
+		audio_panner.pan = 0
+	elif name == "grip_click":
+		audio_player.stream = ok_sound
+		audio_panner.pan = -0.5
+		send_direction(true, false)
+	else:
 		return
 	
-	audio_player.stream = skip_sound
 	audio_player.play()
 	
 	#send_direction()
-	next_point(true)
+	next_point()
 	update_tracking_point()

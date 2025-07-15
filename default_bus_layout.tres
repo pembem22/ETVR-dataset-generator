@@ -1,0 +1,8 @@
+[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://dx4lmrbk3b1xn"]
+
+[sub_resource type="AudioEffectPanner" id="AudioEffectPanner_fme2g"]
+resource_name = "Panner"
+
+[resource]
+bus/0/effect/0/effect = SubResource("AudioEffectPanner_fme2g")
+bus/0/effect/0/enabled = true
